@@ -22,7 +22,7 @@ class CreateAdminUseCase
     public function execute($email, $password): Administrator
     {
         $userRepository = $this->entityManager->getRepository(Administrator::class);
-        $existingUser = $userRepository->findOneBy(['email' => $email()]);
+        $existingUser = $userRepository->findOneBy(['email' => $email]);
 
         if ($existingUser) {
             throw new Exception('Invalid email.');

@@ -5,7 +5,6 @@ namespace App\Controller\Auth;
 use App\Application\Auth\Login\AdminLoginUseCase;
 use App\Application\Auth\Login\LoginRequest;
 use App\Application\Auth\Register\CreateAdminUseCase;
-use App\Application\Auth\Register\RegisterRequest;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
