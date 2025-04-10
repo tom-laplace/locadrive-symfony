@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
+use InvalidArgumentException;
 
 #[ORM\Entity(repositoryClass: CustomerRepository::class)]
 class Customer extends User
@@ -29,8 +30,18 @@ class Customer extends User
     #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'customer')]
     private Collection $orders;
 
-    public function __construct()
+    public function __construct($email, $password, $firstName, $lastName, $licenseObtainmentDate)
     {
+        $this->validatePassword($password);
+        $this->validateNewCustomerArguments($firstName, $lastName, $licenseObtainmentDate);
+
+        $this->setEmail($email);
+        $this->setPassword($password);
+        $this->setFirstName($firstName);
+        $this->setLastName($lastName);
+        $this->setLicenseObtainmentDate($licenseObtainmentDate);
+        $this->setRoles(['ROLE_CUSTOMER']);
+
         $this->orders = new ArrayCollection();
     }
 
@@ -135,6 +146,28 @@ class Customer extends User
     {
         if (!$order->getStatus() === "CART") {
             throw new Exception("Can't update an order outside of the cart.");
+        }
+    }
+
+    private function validatePassword(string $password): void
+    {
+        if (strlen($password) < 8) {
+            throw new Exception('Password should be at least composed of 8 characters.');
+        }
+
+        if (strlen(preg_replace('/[^0-9]/', '', $password)) < 4) {
+            throw new Exception('Password should have at least 4 numbers');
+        }
+
+        if (strlen(preg_replace('/[^a-zA-Z]/', '', $password)) < 4) {
+            throw new Exception('Password should have at least 4 letters');
+        }
+    }
+
+    private function validateNewCustomerArguments($firstName, $lastName, $licenseObtainmentDate)
+    {
+        if (!$firstName || !$lastName || !$licenseObtainmentDate) {
+            throw new InvalidArgumentException('Mising an argument to create new customer.');
         }
     }
 }
