@@ -1,0 +1,22 @@
+flowchart-diagram
+
+Administrateur [icon: user-plus]
+Client [icon: user]
+Véhicule [icon: car]
+Réservation [icon: check]
+Assurance [icon: alert-octagon]
+Paiement [icon: payment]
+
+Administrateur > Véhicule : Gère le parc de voitures
+
+Client > Réservation : Effectue des
+
+Réservation > Véhicule : Contient un
+
+Assurance < Réservation : Peut avoir une
+
+Client > Assurance : Peut demander une
+
+Client > Paiement : Effectue 
+
+Paiement > Réservation : Concerne
