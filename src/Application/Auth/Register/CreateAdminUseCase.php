@@ -19,18 +19,18 @@ class CreateAdminUseCase
         $this->entityManager = $entityManager;
         $this->passwordManager = $passwordManager;
     }
-    public function execute(RegisterRequest $registerRequest): Administrator
+    public function execute($email, $password): Administrator
     {
         $userRepository = $this->entityManager->getRepository(Administrator::class);
-        $existingUser = $userRepository->findOneBy(['email' => $registerRequest->getEmail()]);
+        $existingUser = $userRepository->findOneBy(['email' => $email()]);
 
         if ($existingUser) {
             throw new Exception('Invalid email.');
         }
 
         $admin = new Administrator();
-        $admin->setEmail($registerRequest->getEmail());
-        $admin->setPassword($this->passwordManager->hash($registerRequest->getPassword()));
+        $admin->setEmail($email);
+        $admin->setPassword($this->passwordManager->hash($password));
         $admin->setRoles(['ROLE_ADMIN']);
 
         try {

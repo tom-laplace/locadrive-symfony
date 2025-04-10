@@ -5,27 +5,26 @@ namespace App\Application\Auth\Login;
 use App\Application\Service\PasswordManager;
 use App\Entity\Administrator;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class AdminLoginUseCase
 {
     private EntityManagerInterface $entityManager;
     private PasswordManager $passwordManager;
-    private TokenStorageInterface $tokenStorage;
+    private JWTTokenManagerInterface $jwtManager;
 
     public function __construct(
         EntityManagerInterface $entityManager,
         PasswordManager $passwordManager,
-        TokenStorageInterface $tokenStorage
+        JWTTokenManagerInterface $jwtManager
     ) {
         $this->entityManager = $entityManager;
         $this->passwordManager = $passwordManager;
-        $this->tokenStorage = $tokenStorage;
+        $this->jwtManager = $jwtManager;
     }
 
-    public function execute(LoginRequest $loginRequest): Administrator
+    public function execute(LoginRequest $loginRequest): array
     {
         $email = $loginRequest->getEmail();
         $password = $loginRequest->getPassword();
@@ -37,14 +36,11 @@ class AdminLoginUseCase
             throw new AuthenticationException("Email or password invalid.");
         }
 
-        $token = new UsernamePasswordToken(
-            $admin,
-            'main',
-            $admin->getRoles()
-        );
+        $token = $this->jwtManager->create($admin);
 
-        $this->tokenStorage->setToken($token);
-
-        return $admin;
+        return [
+            'admin' => $admin,
+            'token' => $token
+        ];
     }
 }

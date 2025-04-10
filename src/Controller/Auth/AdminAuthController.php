@@ -37,12 +37,14 @@ class AdminAuthController extends AbstractController
             }
 
             $loginRequest = new LoginRequest($data['email'], $data['password']);
-            $admin = $adminLoginUseCase->execute($loginRequest);
+            $result = $adminLoginUseCase->execute($loginRequest);
+            $admin = $result['admin'];
 
             return $this->json([
                 'id' => $admin->getId(),
                 'email' => $admin->getEmail(),
                 'roles' => $admin->getRoles(),
+                'token' => $result['token'],
                 'message' => 'Connexion réussie'
             ]);
 
@@ -69,15 +71,7 @@ class AdminAuthController extends AbstractController
                 ], Response::HTTP_BAD_REQUEST);
             }
 
-            $registerRequest = new RegisterRequest(
-                $data['email'],
-                $data['password'],
-                $data['firstName'] ?? '',
-                $data['lastName'] ?? '',
-                null
-            );
-
-            $admin = $createAdminUseCase->execute($registerRequest);
+            $admin = $createAdminUseCase->execute($data['email'], $data['password']);
 
             return $this->json([
                 'id' => $admin->getId(),
@@ -91,13 +85,5 @@ class AdminAuthController extends AbstractController
                 'error' => 'Une erreur est survenue lors de la création de l\'administrateur'
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-    }
-
-    #[Route('/logout', name: 'admin_logout', methods: ['POST'])]
-    public function logout(): JsonResponse
-    {
-        return $this->json([
-            'message' => 'Déconnexion réussie'
-        ]);
     }
 }

@@ -31,7 +31,6 @@ class CustomerAuthController extends AbstractController
         try {
             $data = json_decode($request->getContent(), true);
 
-            // Vérifier les données obligatoires
             if (
                 !isset($data['email']) || !isset($data['password']) ||
                 !isset($data['firstName']) || !isset($data['lastName']) ||
@@ -42,7 +41,6 @@ class CustomerAuthController extends AbstractController
                 ], Response::HTTP_BAD_REQUEST);
             }
 
-            // Convertir la date d'obtention de permis
             $licenseDate = null;
             try {
                 $licenseDate = new \DateTime($data['licenseObtainmentDate']);
@@ -92,15 +90,16 @@ class CustomerAuthController extends AbstractController
             }
 
             $loginRequest = new LoginRequest($data['email'], $data['password']);
-            $customer = $customerLoginUseCase->execute($loginRequest);
+            $result = $customerLoginUseCase->execute($loginRequest);
+            $customer = $result['customer'];
 
-            // Retourner une réponse JSON avec les informations du client
             return $this->json([
                 'id' => $customer->getId(),
                 'email' => $customer->getEmail(),
                 'firstName' => $customer->getFirstName(),
                 'lastName' => $customer->getLastName(),
                 'roles' => $customer->getRoles(),
+                'token' => $result['token'],
                 'message' => 'Connexion réussie'
             ]);
 
@@ -113,15 +112,5 @@ class CustomerAuthController extends AbstractController
                 'error' => 'Une erreur est survenue lors de la connexion'
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-    }
-
-    #[Route('/logout', name: 'customer_logout', methods: ['POST'])]
-    public function logout(): JsonResponse
-    {
-        // La déconnexion est gérée par le firewall de sécurité Symfony
-        // Cette méthode ne sera normalement jamais exécutée
-        return $this->json([
-            'message' => 'Déconnexion réussie'
-        ]);
     }
 }

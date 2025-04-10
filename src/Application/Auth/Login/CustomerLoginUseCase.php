@@ -3,30 +3,28 @@
 namespace App\Application\Auth\Login;
 
 use App\Application\Service\PasswordManager;
-use App\Entity\Administrator;
 use App\Entity\Customer;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class CustomerLoginUseCase
 {
     private EntityManagerInterface $entityManager;
     private PasswordManager $passwordManager;
-    private TokenStorageInterface $tokenStorage;
+    private JWTTokenManagerInterface $jwtManager;
 
     public function __construct(
         EntityManagerInterface $entityManager,
         PasswordManager $passwordManager,
-        TokenStorageInterface $tokenStorage
+        JWTTokenManagerInterface $jwtManager
     ) {
         $this->entityManager = $entityManager;
         $this->passwordManager = $passwordManager;
-        $this->tokenStorage = $tokenStorage;
+        $this->jwtManager = $jwtManager;
     }
 
-    public function execute(LoginRequest $loginRequest): Customer
+    public function execute(LoginRequest $loginRequest): array
     {
         $email = $loginRequest->getEmail();
         $password = $loginRequest->getPassword();
@@ -38,14 +36,11 @@ class CustomerLoginUseCase
             throw new AuthenticationException("Email or password invalid.");
         }
 
-        $token = new UsernamePasswordToken(
-            $customer,
-            'main',
-            $customer->getRoles()
-        );
+        $token = $this->jwtManager->create($customer);
 
-        $this->tokenStorage->setToken($token);
-
-        return $customer;
+        return [
+            'customer' => $customer,
+            'token' => $token
+        ];
     }
 }
