@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\Table(name: '`order`')]
@@ -140,7 +141,13 @@ class Order
 
     public function setInsurance(?Insurance $insurance): static
     {
-        $this->insurance = $insurance;
+        if ($this->getInsurance() == null) {
+            $this->insurance = $insurance;
+            $this->setTotalAmount($this->getTotalAmount() + $insurance->getPrice());
+        } else {
+            $this->setTotalAmount($this->getTotalAmount() - $insurance->getPrice());
+            $this->insurance = null;
+        }
 
         return $this;
     }

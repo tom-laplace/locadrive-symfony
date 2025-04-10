@@ -3,10 +3,12 @@
 namespace App\Entity;
 
 use App\Repository\CustomerRepository;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 
 #[ORM\Entity(repositoryClass: CustomerRepository::class)]
 class Customer extends User
@@ -96,5 +98,43 @@ class Customer extends User
         }
 
         return $this;
+    }
+
+    public function withdrawVehicleFromOrder(Order $order, OrderItem $orderItem)
+    {
+        $this->checkIfOrderIsAssignedToCustomer($order);
+        $this->checkIfOrderStatusIsCart($order);
+
+        try {
+            $order->removeOrderItem($orderItem);
+        } catch (Exception $e) {
+            throw new Exception("Unexpected error while removing the order item from the order. Please try again.");
+        }
+
+        return $order;
+    }
+
+    public function addAssuranceToOrder(Order $order, Insurance $insurance)
+    {
+        $this->checkIfOrderIsAssignedToCustomer($order);
+        $this->checkIfOrderStatusIsCart($order);
+
+        $order->setInsurance($insurance);
+
+        return $order;
+    }
+
+    private function checkIfOrderIsAssignedToCustomer(Order $order)
+    {
+        if (!$this->orders->contains($order)) {
+            throw new Exception("Can't update this order because it's not yours.");
+        }
+    }
+
+    private function checkIfOrderStatusIsCart(Order $order)
+    {
+        if (!$order->getStatus() === "CART") {
+            throw new Exception("Can't update an order outside of the cart.");
+        }
     }
 }

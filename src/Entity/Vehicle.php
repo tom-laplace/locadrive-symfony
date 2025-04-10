@@ -25,6 +25,22 @@ class Vehicle
     #[ORM\Column]
     private ?bool $isAvailable = null;
 
+    public function __construct($brand, $model, $dailyRate)
+    {
+        if (!is_string($brand) || !is_string($model)) {
+            throw new \InvalidArgumentException("Bad arguments for brand or model.");
+        }
+
+        if ($dailyRate < 1) {
+            throw new \InvalidArgumentException("Daily rate can't be inferior to 1.");
+        }
+
+        $this->setBrand($brand);
+        $this->setModel($model);
+        $this->setDailyRate($dailyRate);
+        $this->setIsAvailable(true);
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -35,7 +51,7 @@ class Vehicle
         return $this->brand;
     }
 
-    public function setBrand(string $brand): static
+    private function setBrand(string $brand): static
     {
         $this->brand = $brand;
 
@@ -47,7 +63,7 @@ class Vehicle
         return $this->model;
     }
 
-    public function setModel(string $model): static
+    private function setModel(string $model): static
     {
         $this->model = $model;
 
@@ -59,7 +75,7 @@ class Vehicle
         return $this->dailyRate;
     }
 
-    public function setDailyRate(float $dailyRate): static
+    private function setDailyRate(float $dailyRate): static
     {
         $this->dailyRate = $dailyRate;
 
@@ -71,7 +87,7 @@ class Vehicle
         return $this->isAvailable;
     }
 
-    public function setIsAvailable(bool $isAvailable): static
+    private function setIsAvailable(bool $isAvailable): static
     {
         $this->isAvailable = $isAvailable;
 

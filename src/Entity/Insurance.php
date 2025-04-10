@@ -19,6 +19,12 @@ class Insurance
     #[ORM\Column(length: 255)]
     private ?string $description = null;
 
+    public function __construct()
+    {
+        $this->price = 20;
+        $this->description = "Basic insurance provided by Locadrive";
+    }
+
     public function getId(): ?int
     {
         return $this->id;
