@@ -3,27 +3,28 @@
 namespace App\Controller;
 
 use App\Application\Vehicle\CreateVehicleUseCase;
+use App\Entity\Administrator;
 use App\Entity\Vehicle;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Finder\Exception\AccessDeniedException;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('api/vehicle')]
+#[Route('/api/vehicle')]
 class VehicleController extends AbstractController
 {
 
     private $createVehicleUseCase;
-
-    private function __construct(CreateVehicleUseCase $createVehicleUseCase)
+    public function __construct(CreateVehicleUseCase $createVehicleUseCase, Security $security)
     {
         $this->createVehicleUseCase = $createVehicleUseCase;
     }
 
-    #[Route(path: '/', name: 'all_vehicles', methods: ['GET'])]
+    #[Route(path: '/', name: 'all_vehicles', methods: 'GET')]
     public function index(EntityManagerInterface $em): JsonResponse
     {
         $vehicles = $em->getRepository(Vehicle::class)->findAll();
@@ -31,9 +32,15 @@ class VehicleController extends AbstractController
         return $this->json($vehicles);
     }
 
-    #[Route(path: '/', name: 'create_vehicle', methods: ['POST'])]
+    #[Route(path: '/', name: 'create_vehicle', methods: 'POST')]
     public function create(Request $request): JsonResponse
     {
+
+        $user = $this->getUser();
+        if (!$user instanceof Administrator) {
+            throw new AccessDeniedException('Only administrator can create vehicles.');
+        }
+
         $data = json_decode($request->getContent(), true);
 
         if (!isset($data['brand']) || !isset($data['model']) || !isset($data['dailyRate'])) {
