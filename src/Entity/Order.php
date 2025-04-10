@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\OrderRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -21,20 +23,32 @@ class Order
     #[ORM\Column]
     private ?float $totalAmount = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $creationDate = null;
 
-    #[ORM\ManyToOne]
-    private ?Insurance $insuranceId = null;
-
     #[ORM\ManyToOne(inversedBy: 'orders')]
-    private ?PaymentMethod $paymentMethodId = null;
-
-    #[ORM\OneToOne(inversedBy: 'relatedOrder', cascade: ['persist', 'remove'])]
-    private ?Payment $paymentId = null;
-
-    #[ORM\ManyToOne(inversedBy: 'orders')]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Customer $customer = null;
+
+    /**
+     * @var Collection<int, OrderItem>
+     */
+    #[ORM\OneToMany(targetEntity: OrderItem::class, mappedBy: 'orderRef')]
+    private Collection $orderItems;
+
+    #[ORM\ManyToOne]
+    private ?Insurance $insurance = null;
+
+    #[ORM\ManyToOne(inversedBy: 'orders')]
+    private ?PaymentMethod $paymentMethod = null;
+
+    #[ORM\OneToOne(inversedBy: 'orderRef', cascade: ['persist', 'remove'])]
+    private ?Payment $payment = null;
+
+    public function __construct()
+    {
+        $this->orderItems = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -77,42 +91,6 @@ class Order
         return $this;
     }
 
-    public function getInsuranceId(): ?Insurance
-    {
-        return $this->insuranceId;
-    }
-
-    public function setInsuranceId(?Insurance $insuranceId): static
-    {
-        $this->insuranceId = $insuranceId;
-
-        return $this;
-    }
-
-    public function getPaymentMethodId(): ?PaymentMethod
-    {
-        return $this->paymentMethodId;
-    }
-
-    public function setPaymentMethodId(?PaymentMethod $paymentMethodId): static
-    {
-        $this->paymentMethodId = $paymentMethodId;
-
-        return $this;
-    }
-
-    public function getPaymentId(): ?Payment
-    {
-        return $this->paymentId;
-    }
-
-    public function setPaymentId(?Payment $paymentId): static
-    {
-        $this->paymentId = $paymentId;
-
-        return $this;
-    }
-
     public function getCustomer(): ?Customer
     {
         return $this->customer;
@@ -121,6 +99,72 @@ class Order
     public function setCustomer(?Customer $customer): static
     {
         $this->customer = $customer;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, OrderItem>
+     */
+    public function getOrderItems(): Collection
+    {
+        return $this->orderItems;
+    }
+
+    public function addOrderItem(OrderItem $orderItem): static
+    {
+        if (!$this->orderItems->contains($orderItem)) {
+            $this->orderItems->add($orderItem);
+            $orderItem->setOrderRef($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrderItem(OrderItem $orderItem): static
+    {
+        if ($this->orderItems->removeElement($orderItem)) {
+            // set the owning side to null (unless already changed)
+            if ($orderItem->getOrderRef() === $this) {
+                $orderItem->setOrderRef(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getInsurance(): ?Insurance
+    {
+        return $this->insurance;
+    }
+
+    public function setInsurance(?Insurance $insurance): static
+    {
+        $this->insurance = $insurance;
+
+        return $this;
+    }
+
+    public function getPaymentMethod(): ?PaymentMethod
+    {
+        return $this->paymentMethod;
+    }
+
+    public function setPaymentMethod(?PaymentMethod $paymentMethod): static
+    {
+        $this->paymentMethod = $paymentMethod;
+
+        return $this;
+    }
+
+    public function getPayment(): ?Payment
+    {
+        return $this->payment;
+    }
+
+    public function setPayment(?Payment $payment): static
+    {
+        $this->payment = $payment;
 
         return $this;
     }

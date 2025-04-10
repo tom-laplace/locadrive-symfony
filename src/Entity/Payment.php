@@ -23,8 +23,8 @@ class Payment
     #[ORM\Column(length: 255)]
     private ?string $transactionId = null;
 
-    #[ORM\OneToOne(mappedBy: 'paymentId', cascade: ['persist', 'remove'])]
-    private ?Order $relatedOrder = null;
+    #[ORM\OneToOne(mappedBy: 'payment', cascade: ['persist', 'remove'])]
+    private ?Order $orderRef = null;
 
     public function getId(): ?int
     {
@@ -67,24 +67,24 @@ class Payment
         return $this;
     }
 
-    public function getRelatedOrder(): ?Order
+    public function getOrderRef(): ?Order
     {
-        return $this->relatedOrder;
+        return $this->orderRef;
     }
 
-    public function setRelatedOrder(?Order $relatedOrder): static
+    public function setOrderRef(?Order $orderRef): static
     {
         // unset the owning side of the relation if necessary
-        if ($relatedOrder === null && $this->relatedOrder !== null) {
-            $this->relatedOrder->setPaymentId(null);
+        if ($orderRef === null && $this->orderRef !== null) {
+            $this->orderRef->setPayment(null);
         }
 
         // set the owning side of the relation if necessary
-        if ($relatedOrder !== null && $relatedOrder->getPaymentId() !== $this) {
-            $relatedOrder->setPaymentId($this);
+        if ($orderRef !== null && $orderRef->getPayment() !== $this) {
+            $orderRef->setPayment($this);
         }
 
-        $this->relatedOrder = $relatedOrder;
+        $this->orderRef = $orderRef;
 
         return $this;
     }

@@ -21,7 +21,7 @@ class PaymentMethod
     /**
      * @var Collection<int, Order>
      */
-    #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'paymentMethodId')]
+    #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'paymentMethod')]
     private Collection $orders;
 
     public function __construct()
@@ -58,7 +58,7 @@ class PaymentMethod
     {
         if (!$this->orders->contains($order)) {
             $this->orders->add($order);
-            $order->setPaymentMethodId($this);
+            $order->setPaymentMethod($this);
         }
 
         return $this;
@@ -68,8 +68,8 @@ class PaymentMethod
     {
         if ($this->orders->removeElement($order)) {
             // set the owning side to null (unless already changed)
-            if ($order->getPaymentMethodId() === $this) {
-                $order->setPaymentMethodId(null);
+            if ($order->getPaymentMethod() === $this) {
+                $order->setPaymentMethod(null);
             }
         }
 
