@@ -3,8 +3,10 @@
 namespace App\Entity;
 
 use App\Repository\OrderItemRepository;
+use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use InvalidArgumentException;
 
 #[ORM\Entity(repositoryClass: OrderItemRepository::class)]
 class OrderItem
@@ -31,6 +33,25 @@ class OrderItem
     #[ORM\JoinColumn(nullable: false)]
     private ?Vehicle $vehicle = null;
 
+    public function __construct(Order $orderRef, Vehicle $vehicle, DateTime $startDate, DateTime $endDate, float $price)
+    {
+        $today = new DateTime();
+
+        if ($startDate < $today) {
+            throw new InvalidArgumentException('La date de début doit être ultérieure à aujourd\'hui');
+        }
+
+        if ($endDate <= $startDate) {
+            throw new InvalidArgumentException('La date de fin doit être ultérieure à la date de début');
+        }
+
+        $this->orderRef = $orderRef;
+        $this->vehicle = $vehicle;
+        $this->startDate = $startDate;
+        $this->endDate = $endDate;
+        $this->price = $price;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -41,23 +62,9 @@ class OrderItem
         return $this->startDate;
     }
 
-    public function setStartDate(\DateTimeInterface $startDate): static
-    {
-        $this->startDate = $startDate;
-
-        return $this;
-    }
-
     public function getEndDate(): ?\DateTimeInterface
     {
         return $this->endDate;
-    }
-
-    public function setEndDate(\DateTimeInterface $endDate): static
-    {
-        $this->endDate = $endDate;
-
-        return $this;
     }
 
     public function getPrice(): ?float
@@ -65,34 +72,13 @@ class OrderItem
         return $this->price;
     }
 
-    public function setPrice(float $price): static
-    {
-        $this->price = $price;
-
-        return $this;
-    }
-
     public function getOrderRef(): ?Order
     {
         return $this->orderRef;
     }
 
-    public function setOrderRef(?Order $orderRef): static
-    {
-        $this->orderRef = $orderRef;
-
-        return $this;
-    }
-
     public function getVehicle(): ?Vehicle
     {
         return $this->vehicle;
-    }
-
-    public function setVehicle(?Vehicle $vehicle): static
-    {
-        $this->vehicle = $vehicle;
-
-        return $this;
     }
 }
