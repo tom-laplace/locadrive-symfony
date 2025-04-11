@@ -47,6 +47,7 @@ class AddVehicleToOrderUseCase
             $order->setCreationDate(new DateTime());
 
             $this->entityManager->persist($order);
+            $this->entityManager->flush();
         }
 
         $vehicle = $this->entityManager->getRepository(Vehicle::class)->find($vehicleId);
@@ -62,11 +63,13 @@ class AddVehicleToOrderUseCase
 
         $orderItem = new OrderItem($order, $vehicle, $startDate, $endDate, $price);
 
+
         $order->setTotalAmount($order->getTotalAmount() + $price);
 
         try {
             $this->entityManager->persist($orderItem);
             $this->entityManager->flush();
+
         } catch (Exception $e) {
             throw new Exception("Error while adding vehicle to order");
         }
