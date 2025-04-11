@@ -1,22 +1,22 @@
 flowchart-diagram
 
-Administrateur [icon: user-plus]
-Client [icon: user]
-Véhicule [icon: car]
-Réservation [icon: check]
+Administrator [icon: user-plus]
+Customer [icon: user]
+Vehicle [icon: car]
+Order [icon: check]
 Assurance [icon: alert-octagon]
 Paiement [icon: payment]
 
-Administrateur > Véhicule : Gère le parc de voitures
+Administrator > Vehicle : Gère le parc de voitures
 
-Client > Réservation : Effectue des
+Customer > Order : Effectue des
 
-Réservation > Véhicule : Contient un
+Order > Vehicle : Contient un ou plusieurs
 
-Assurance < Réservation : Peut avoir une
+Assurance < Order : Peut avoir une
 
-Client > Assurance : Peut demander une
+Customer > Assurance : Peut demander une
 
-Client > Paiement : Effectue 
+Customer > Paiement : Effectue
 
-Paiement > Réservation : Concerne
+Paiement > Order : Concerne
