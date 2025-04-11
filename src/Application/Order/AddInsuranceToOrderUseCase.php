@@ -31,7 +31,14 @@ class AddInsuranceToOrderUseCase
             throw new \Exception("This order is already assured.");
         }
 
-        $insurance = new Insurance();
+        try {
+            $insurance = new Insurance();
+            $this->entityManager->persist($insurance);
+            $this->entityManager->flush();
+        } catch (\Exception $e) {
+            throw new \Exception("Error while creating the insurance for the order");
+        }
+
         $order->setInsurance($insurance);
 
         try {

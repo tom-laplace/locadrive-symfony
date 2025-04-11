@@ -21,7 +21,6 @@ class Insurance
 
     public function __construct()
     {
-        $this->id =1;
         $this->price = 20;
         $this->description = "Basic insurance provided by Locadrive";
     }

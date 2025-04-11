@@ -76,17 +76,17 @@ class OrderController extends AbstractController
                 'totalAmount' => $order->getTotalAmount(),
                 'creationDate' => $order->getCreationDate()->format('Y-m-d H:i:s'),
                 'items' => $orderItems,
-                'customer' => $order->getCustomer() ? [
-                    'lastName' => $order->getCustomer()->getLastName(),
-                    'firstName' => $order->getCustomer()->getFirstName(),
+                'customer' => [
                     'id' => $order->getCustomer()->getId(),
-                ] : null,
+                    'firstName' => $order->getCustomer()->getFirstName(),
+                    'lastName' => $order->getCustomer()->getLastName()
+                ],
                 'insurance' => $order->getInsurance() ? [
                     'id' => $order->getInsurance()->getId(),
                     'price' => $order->getInsurance()->getPrice(),
                     'description' => $order->getInsurance()->getDescription()
                 ] : null,
-                'message' => 'Vehicle added to the order.'
+                'message' => 'Insurance added to the order.'
             ], Response::HTTP_OK);
 
         } catch (\Exception $e) {
@@ -112,13 +112,19 @@ class OrderController extends AbstractController
                 'status' => $order->getStatus(),
                 'totalAmount' => $order->getTotalAmount(),
                 'creationDate' => $order->getCreationDate()->format('Y-m-d H:i:s'),
-                'items' => $order->getOrderItems(),
+                'customer' => [
+                    'id' => $order->getCustomer()->getId(),
+                    'firstName' => $order->getCustomer()->getFirstName(),
+                    'lastName' => $order->getCustomer()->getLastName()
+                ],
                 'insurance' => $order->getInsurance() ? [
+                    'id' => $order->getInsurance()->getId(),
                     'price' => $order->getInsurance()->getPrice(),
                     'description' => $order->getInsurance()->getDescription()
                 ] : null,
                 'message' => 'Insurance added to the order.'
             ], Response::HTTP_OK);
+
         } catch (\Exception $e) {
             return $this->json([
                 'error' => $e->getMessage()
