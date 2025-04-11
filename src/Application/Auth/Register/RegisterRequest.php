@@ -2,9 +2,6 @@
 
 namespace App\Application\Auth\Register;
 
-/**
- * Value object représentant une demande d'enregistrement
- */
 class RegisterRequest
 {
     private string $email;

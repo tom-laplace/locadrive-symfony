@@ -175,4 +175,15 @@ class Order
 
         return $this;
     }
+
+    public function pay(Payment $payment)
+    {
+        if($this->getStatus() !== 'CART')
+        {
+            throw new Exception("Can't pay for the order.");
+        }
+
+        $this->setPayment($payment);
+        $this->setStatus("PAID");
+    }
 }

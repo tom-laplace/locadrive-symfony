@@ -39,5 +39,18 @@ services:
       APP_ENV: dev
     working_dir: /var/www/html
 
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4_container
+    restart: always
+    ports:
+      - "8888:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@locadrive.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
 volumes:
   database_data:
+  pgadmin-data:

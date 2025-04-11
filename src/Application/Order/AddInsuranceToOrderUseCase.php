@@ -31,6 +31,10 @@ class AddInsuranceToOrderUseCase
             throw new \Exception("This order is already assured.");
         }
 
+        if ($order->getStatus() !== "CART") {
+            throw new \Exception("Impossible to update this order : not in cart");
+        }
+
         try {
             $insurance = new Insurance();
             $this->entityManager->persist($insurance);
