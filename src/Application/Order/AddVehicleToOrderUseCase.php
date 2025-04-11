@@ -57,17 +57,17 @@ class AddVehicleToOrderUseCase
 
         $this->checkVehicleAvailability($vehicle, $startDate, $endDate);
 
-        $interval = $startDate->diff($endDate);
-        $days = $interval->days + 1;
-        $price = $vehicle->getDailyRate() * $days;
 
-        $orderItem = new OrderItem($order, $vehicle, $startDate, $endDate, $price);
+        $orderItem = new OrderItem($order, $vehicle, $startDate, $endDate);
 
 
-        $order->setTotalAmount($order->getTotalAmount() + $price);
+        $order->setTotalAmount($order->getTotalAmount() + $orderItem->getPrice());
 
         try {
             $this->entityManager->persist($orderItem);
+            $this->entityManager->flush();
+
+            $this->entityManager->persist($order);
             $this->entityManager->flush();
 
         } catch (Exception $e) {

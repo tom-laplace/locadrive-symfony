@@ -124,12 +124,16 @@ class Order
 
     public function removeOrderItem(OrderItem $orderItem): static
     {
+        $this->checkifOrderStatusIsCart();
+
         if ($this->orderItems->removeElement($orderItem)) {
             // set the owning side to null (unless already changed)
             if ($orderItem->getOrderRef() === $this) {
                 $orderItem->setOrderRef(null);
             }
         }
+
+        $this->totalAmount -= $orderItem->getPrice();
 
         return $this;
     }
@@ -178,12 +182,36 @@ class Order
 
     public function pay(Payment $payment)
     {
-        if($this->getStatus() !== 'CART')
-        {
-            throw new Exception("Can't pay for the order.");
+        $this->checkifOrderStatusIsCart();
+
+        if (!$this->getPaymentMethod()) {
+            throw new Exception("Please select a payment method before trying to pay for the order.");
         }
 
-        $this->setPayment($payment);
-        $this->setStatus("PAID");
+        if ($this->getOrderItems()->isEmpty()) {
+            throw new Exception("Can not pay for an empty order.");
+        }
+
+        $this->payment = $payment;
+        $this->status = "PAID";
+    }
+
+    public function removeInsurance()
+    {
+        $this->checkifOrderStatusIsCart();
+
+        if ($this->insurance === null) {
+            throw new Exception("This order is not under an insurance.");
+        }
+
+        $this->totalAmount -= $this->insurance->getPrice();
+        $this->insurance = null;
+    }
+
+    private function checkifOrderStatusIsCart()
+    {
+        if ($this->status !== "CART") {
+            throw new Exception("Order is not in cart.");
+        }
     }
 }

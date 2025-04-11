@@ -3,12 +3,10 @@
 namespace App\Application\Order;
 
 use App\Entity\Order;
-use App\Entity\Payment;
-use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 
-class PayOrderUseCase
+class RemoveInsuranceFromOrderUseCase
 {
     private $entityManager;
 
@@ -17,7 +15,7 @@ class PayOrderUseCase
         $this->entityManager = $entityManager;
     }
 
-    public function execute(int $orderId, int $customerId): Order
+    public function execute($orderId, $customerId): Order
     {
         $order = $this->entityManager->getRepository(Order::class)->find($orderId);
 
@@ -25,22 +23,20 @@ class PayOrderUseCase
             throw new Exception("Can not find order.");
         }
 
-        if ($order->getCustomer()->getId() !== $customerId) {
-            throw new Exception("Error while paying for the order.");
+        if ($order->getCustomer()->getId() != $customerId) {
+            throw new Exception("Can not remove insurance from the order.");
         }
 
         try {
-            $payment = new Payment($order->getTotalAmount());
-            $this->entityManager->persist($payment);
-            $this->entityManager->flush();
+            $order->removeInsurance();
 
-            $order->pay($payment);
             $this->entityManager->persist($order);
             $this->entityManager->flush();
         } catch (Exception $e) {
-            throw new Exception("Error while trying to pay for the order : " . $e->getMessage());
+            throw new Exception("Error while trying to remove insurance from the order.");
         }
 
         return $order;
     }
+
 }

@@ -26,6 +26,13 @@ class Payment
     #[ORM\OneToOne(mappedBy: 'payment', cascade: ['persist', 'remove'])]
     private ?Order $orderRef = null;
 
+    public function __construct(float $amount)
+    {
+        $this->amount = $amount;
+        $this->paymentDate = new \DateTime();
+        $this->transactionId = $this->generateTransactionId();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -36,35 +43,14 @@ class Payment
         return $this->amount;
     }
 
-    public function setAmount(float $amount): static
-    {
-        $this->amount = $amount;
-
-        return $this;
-    }
-
     public function getPaymentDate(): ?\DateTimeInterface
     {
         return $this->paymentDate;
     }
 
-    public function setPaymentDate(\DateTimeInterface $paymentDate): static
-    {
-        $this->paymentDate = $paymentDate;
-
-        return $this;
-    }
-
     public function getTransactionId(): ?string
     {
         return $this->transactionId;
-    }
-
-    public function setTransactionId(string $transactionId): static
-    {
-        $this->transactionId = $transactionId;
-
-        return $this;
     }
 
     public function getOrderRef(): ?Order
@@ -88,4 +74,10 @@ class Payment
 
         return $this;
     }
+
+    private function generateTransactionId(): string
+    {
+        return 'TR-' . uniqid() . '-' . time();
+    }
+
 }

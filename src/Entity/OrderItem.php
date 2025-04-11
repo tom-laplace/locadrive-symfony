@@ -26,14 +26,14 @@ class OrderItem
     private ?float $price = null;
 
     #[ORM\ManyToOne(inversedBy: 'orderItems')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Order $orderRef = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?Vehicle $vehicle = null;
 
-    public function __construct(Order $orderRef, Vehicle $vehicle, DateTime $startDate, DateTime $endDate, float $price)
+    public function __construct(Order $orderRef, Vehicle $vehicle, DateTime $startDate, DateTime $endDate)
     {
         $today = new DateTime();
 
@@ -49,7 +49,7 @@ class OrderItem
         $this->vehicle = $vehicle;
         $this->startDate = $startDate;
         $this->endDate = $endDate;
-        $this->price = $price;
+        $this->price = $this->calculatePrice($startDate, $endDate, $vehicle->getDailyRate());
     }
 
     public function getId(): ?int
@@ -80,5 +80,19 @@ class OrderItem
     public function getVehicle(): ?Vehicle
     {
         return $this->vehicle;
+    }
+
+    public function setOrderRef(?Order $orderRef)
+    {
+        $this->orderRef = $orderRef;
+    }
+
+    public function calculatePrice($startDate, $endDate, $dailyRate)
+    {
+        $interval = $startDate->diff($endDate);
+        $days = $interval->days + 1;
+        $price = $dailyRate * $days;
+
+        return $price;
     }
 }
