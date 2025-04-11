@@ -82,7 +82,7 @@ class OrderItem
         return $this->vehicle;
     }
 
-    public function setOrderRef(?Order $orderRef)
+    public function addOrderRef(?Order $orderRef)
     {
         $this->orderRef = $orderRef;
     }

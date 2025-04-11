@@ -35,10 +35,10 @@ class Vehicle
             throw new \InvalidArgumentException("Daily rate can't be inferior to 1.");
         }
 
-        $this->setBrand($brand);
-        $this->setModel($model);
-        $this->setDailyRate($dailyRate);
-        $this->setIsAvailable(true);
+        $this->brand = $brand;
+        $this->model = $model;
+        $this->dailyRate = $dailyRate;
+        $this->isAvailable = true;
     }
 
     public function update($brand, $model, $dailyRate, $isAvailable)
@@ -67,23 +67,9 @@ class Vehicle
         return $this->brand;
     }
 
-    private function setBrand(string $brand): static
-    {
-        $this->brand = $brand;
-
-        return $this;
-    }
-
     public function getModel(): ?string
     {
         return $this->model;
-    }
-
-    private function setModel(string $model): static
-    {
-        $this->model = $model;
-
-        return $this;
     }
 
     public function getDailyRate(): ?float
@@ -91,22 +77,8 @@ class Vehicle
         return $this->dailyRate;
     }
 
-    private function setDailyRate(float $dailyRate): static
-    {
-        $this->dailyRate = $dailyRate;
-
-        return $this;
-    }
-
     public function isAvailable(): ?bool
     {
         return $this->isAvailable;
-    }
-
-    private function setIsAvailable(bool $isAvailable): static
-    {
-        $this->isAvailable = $isAvailable;
-
-        return $this;
     }
 }

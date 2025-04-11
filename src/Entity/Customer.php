@@ -35,12 +35,12 @@ class Customer extends User
         $this->validatePassword($password);
         $this->validateNewCustomerArguments($firstName, $lastName, $licenseObtainmentDate);
 
-        $this->setEmail($email);
-        $this->setPassword($password);
-        $this->setFirstName($firstName);
-        $this->setLastName($lastName);
-        $this->setLicenseObtainmentDate($licenseObtainmentDate);
-        $this->setRoles(['ROLE_CUSTOMER']);
+        $this->$email = $email;
+        $this->$password = $password;
+        $this->$firstName = $firstName;
+        $this->$lastName = $lastName;
+        $this->$licenseObtainmentDate = $licenseObtainmentDate;
+        $this->$roles = ['ROLE_CUSTOMER'];
 
         $this->orders = new ArrayCollection();
     }
@@ -50,35 +50,14 @@ class Customer extends User
         return $this->firstName;
     }
 
-    public function setFirstName(string $firstName): static
-    {
-        $this->firstName = $firstName;
-
-        return $this;
-    }
-
     public function getLastName(): ?string
     {
         return $this->lastName;
     }
 
-    public function setLastName(string $lastName): static
-    {
-        $this->lastName = $lastName;
-
-        return $this;
-    }
-
     public function getLicenseObtainmentDate(): ?\DateTimeInterface
     {
         return $this->licenseObtainmentDate;
-    }
-
-    public function setLicenseObtainmentDate(\DateTimeInterface $licenseObtainmentDate): static
-    {
-        $this->licenseObtainmentDate = $licenseObtainmentDate;
-
-        return $this;
     }
 
     /**
@@ -109,44 +88,6 @@ class Customer extends User
         }
 
         return $this;
-    }
-
-    public function withdrawVehicleFromOrder(Order $order, OrderItem $orderItem)
-    {
-        $this->checkIfOrderIsAssignedToCustomer($order);
-        $this->checkIfOrderStatusIsCart($order);
-
-        try {
-            $order->removeOrderItem($orderItem);
-        } catch (Exception $e) {
-            throw new Exception("Unexpected error while removing the order item from the order. Please try again.");
-        }
-
-        return $order;
-    }
-
-    public function addAssuranceToOrder(Order $order, Insurance $insurance)
-    {
-        $this->checkIfOrderIsAssignedToCustomer($order);
-        $this->checkIfOrderStatusIsCart($order);
-
-        $order->setInsurance($insurance);
-
-        return $order;
-    }
-
-    private function checkIfOrderIsAssignedToCustomer(Order $order)
-    {
-        if (!$this->orders->contains($order)) {
-            throw new Exception("Can't update this order because it's not yours.");
-        }
-    }
-
-    private function checkIfOrderStatusIsCart(Order $order)
-    {
-        if (!$order->getStatus() === "CART") {
-            throw new Exception("Can't update an order outside of the cart.");
-        }
     }
 
     private function validatePassword(string $password): void

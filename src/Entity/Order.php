@@ -91,7 +91,7 @@ class Order
     {
         if (!$this->orderItems->contains($orderItem)) {
             $this->orderItems->add($orderItem);
-            $orderItem->setOrderRef($this);
+            $orderItem->addOrderRef($this);
         }
 
         $this->totalAmount = $this->addPriceToTotalAmount($orderItem->getPrice());
@@ -106,13 +106,20 @@ class Order
         if ($this->orderItems->removeElement($orderItem)) {
             // set the owning side to null (unless already changed)
             if ($orderItem->getOrderRef() === $this) {
-                $orderItem->setOrderRef(null);
+                $orderItem->addOrderRef(null);
             }
         }
 
         $this->totalAmount = $this->removePriceToTotalAmount($orderItem->getPrice());
 
         return $this;
+    }
+
+    public function addPayment(?Payment $payment)
+    {
+        $this->checkifOrderStatusIsCart();
+
+        $this->payment = $payment;
     }
 
     public function getInsurance(): ?Insurance
@@ -170,7 +177,7 @@ class Order
         $this->insurance = null;
     }
 
-    public function addPaymentMethod(PaymentMethod $paymentMethod)
+    public function addPaymentMethod(?PaymentMethod $paymentMethod)
     {
         $this->checkifOrderStatusIsCart();
 

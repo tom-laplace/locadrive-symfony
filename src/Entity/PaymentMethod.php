@@ -58,7 +58,7 @@ class PaymentMethod
     {
         if (!$this->orders->contains($order)) {
             $this->orders->add($order);
-            $order->setPaymentMethod($this);
+            $order->addPaymentMethod($this);
         }
 
         return $this;
@@ -69,7 +69,7 @@ class PaymentMethod
         if ($this->orders->removeElement($order)) {
             // set the owning side to null (unless already changed)
             if ($order->getPaymentMethod() === $this) {
-                $order->setPaymentMethod(null);
+                $order->addPaymentMethod(null);
             }
         }
 

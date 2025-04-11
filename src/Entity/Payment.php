@@ -62,12 +62,12 @@ class Payment
     {
         // unset the owning side of the relation if necessary
         if ($orderRef === null && $this->orderRef !== null) {
-            $this->orderRef->setPayment(null);
+            $this->orderRef->addPayment(null);
         }
 
         // set the owning side of the relation if necessary
         if ($orderRef !== null && $orderRef->getPayment() !== $this) {
-            $orderRef->setPayment($this);
+            $orderRef->addPayment($this);
         }
 
         $this->orderRef = $orderRef;
