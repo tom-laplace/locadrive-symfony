@@ -41,6 +41,22 @@ class Vehicle
         $this->setIsAvailable(true);
     }
 
+    public function update($brand, $model, $dailyRate, $isAvailable)
+    {
+        if (!is_string($brand) || !is_string($model)) {
+            throw new \InvalidArgumentException("Bad arguments for brand or model.");
+        }
+
+        if ($dailyRate < 1) {
+            throw new \InvalidArgumentException("Daily rate can't be inferior to 1.");
+        }
+
+        $this->brand = $brand;
+        $this->model = $model;
+        $this->dailyRate = $dailyRate;
+        $this->isAvailable = $isAvailable;
+    }
+
     public function getId(): ?int
     {
         return $this->id;

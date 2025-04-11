@@ -40,4 +40,13 @@ class InsuranceRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    /**
+     * @param int $id
+     * @return Insurance|null
+     */
+    public function findOneById(int $id): ?Insurance
+    {
+        return $this->find($id);
+    }
 }

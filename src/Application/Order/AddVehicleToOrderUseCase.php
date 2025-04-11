@@ -6,6 +6,8 @@ use App\Entity\Customer;
 use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Entity\Vehicle;
+use App\Repository\OrderRepository;
+use App\Repository\VehicleRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -14,10 +16,14 @@ use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 class AddVehicleToOrderUseCase
 {
     private $entityManager;
+    private $orderRepository;
+    private $vehicleRepository;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $entityManager, OrderRepository $orderRepository, VehicleRepository $vehicleRepository)
     {
         $this->entityManager = $entityManager;
+        $this->orderRepository = $orderRepository;
+        $this->vehicleRepository = $vehicleRepository;
     }
 
     public function execute(
@@ -30,7 +36,7 @@ class AddVehicleToOrderUseCase
 
         $order = null;
         if ($orderId) {
-            $order = $this->entityManager->getRepository(Order::class)->find($orderId);
+            $order = $this->orderRepository->findOneById($orderId);
 
             if ($order->getStatus() !== "CART") {
                 throw new Exception("Impossible to update this order : not in cart");
@@ -40,28 +46,29 @@ class AddVehicleToOrderUseCase
                 throw new Exception("Can't update order.");
             }
         } else {
-            $order = new Order();
-            $order->setCustomer($customer);
-            $order->setStatus('CART');
-            $order->setTotalAmount(0);
-            $order->setCreationDate(new DateTime());
-
-            $this->entityManager->persist($order);
-            $this->entityManager->flush();
+            try {
+                $order = new Order($customer);
+                $this->entityManager->persist($order);
+                $this->entityManager->flush();
+            } catch (Exception $e) {
+                throw new Exception("Error while creating the order.");
+            }
         }
 
-        $vehicle = $this->entityManager->getRepository(Vehicle::class)->find($vehicleId);
+        $vehicle = $this->vehicleRepository->findOneById($vehicleId);
         if (!$vehicle) {
             throw new BadRequestException("Can't find vehicle.");
         }
 
-        $this->checkVehicleAvailability($vehicle, $startDate, $endDate);
+        // $this->checkVehicleAvailability($vehicle, $startDate, $endDate);
 
-
-        $orderItem = new OrderItem($order, $vehicle, $startDate, $endDate);
-
-
-        $order->setTotalAmount($order->getTotalAmount() + $orderItem->getPrice());
+        try {
+            $orderItem = new OrderItem($order, $vehicle, $startDate, $endDate);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+        
+        $order->addOrderItem($orderItem);
 
         try {
             $this->entityManager->persist($orderItem);
@@ -75,30 +82,5 @@ class AddVehicleToOrderUseCase
         }
 
         return $order;
-    }
-
-    private function checkVehicleAvailability(Vehicle $vehicle, DateTime $startDate, DateTime $endDate, ?int $excludeOrderId = null): void
-    {
-        $orderItemRepository = $this->entityManager->getRepository(OrderItem::class);
-
-        $qb = $orderItemRepository->createQueryBuilder('oi')
-            ->join('oi.orderRef', 'o')
-            ->join('oi.vehicle', 'v')
-            ->where('v.id = :vehicleId')
-            ->andWhere('o.status != :statusCart OR (o.status = :statusCart AND o.id != :excludeOrderId)')
-            ->andWhere(
-                '(oi.startDate <= :endDate AND oi.endDate >= :startDate)'
-            )
-            ->setParameter('vehicleId', $vehicle->getId())
-            ->setParameter('statusCart', 'CART')
-            ->setParameter('excludeOrderId', $excludeOrderId)
-            ->setParameter('startDate', $startDate)
-            ->setParameter('endDate', $endDate);
-
-        $conflictingItems = $qb->getQuery()->getResult();
-
-        if (count($conflictingItems) > 0) {
-            throw new BadRequestException('This vehicule is not available for this duration.');
-        }
     }
 }

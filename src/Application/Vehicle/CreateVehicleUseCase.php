@@ -18,7 +18,11 @@ class CreateVehicleUseCase
     public function execute(string $brand, string $model, float $dailyRate)
     {
 
-        $vehicle = new Vehicle($brand, $model, $dailyRate);
+        try {
+            $vehicle = new Vehicle($brand, $model, $dailyRate);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
 
         try {
             $this->entityManager->persist($vehicle);

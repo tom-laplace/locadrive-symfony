@@ -40,4 +40,12 @@ class OrderRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+    /**
+     * @param int $id
+     * @return Order|null
+     */
+    public function findOneById(int $id): ?Order
+    {
+        return $this->find($id);
+    }
 }

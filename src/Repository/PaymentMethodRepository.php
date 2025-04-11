@@ -40,4 +40,13 @@ class PaymentMethodRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+/**
+     * @param int $id
+     * @return PaymentMethod|null
+     */
+    public function findOneById(int $id): ?PaymentMethod
+    {
+        return $this->find($id);
+    }
 }

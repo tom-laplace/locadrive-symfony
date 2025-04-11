@@ -16,7 +16,7 @@ class PaymentRepository extends ServiceEntityRepository
         parent::__construct($registry, Payment::class);
     }
 
-//    /**
+    //    /**
 //     * @return Payment[] Returns an array of Payment objects
 //     */
 //    public function findByExampleField($value): array
@@ -31,7 +31,7 @@ class PaymentRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Payment
+    //    public function findOneBySomeField($value): ?Payment
 //    {
 //        return $this->createQueryBuilder('p')
 //            ->andWhere('p.exampleField = :val')
@@ -40,4 +40,13 @@ class PaymentRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+    /**
+     * @param int $id
+     * @return Payment|null
+     */
+    public function findOneById(int $id): ?Payment
+    {
+        return $this->find($id);
+    }
 }

@@ -40,4 +40,13 @@ class VehicleRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    /**
+     * @param int $id
+     * @return Vehicle|null
+     */
+    public function findOneById(int $id): ?Vehicle
+    {
+        return $this->find($id);
+    }
 }

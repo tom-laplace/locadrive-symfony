@@ -46,9 +46,12 @@ class Order
     #[ORM\OneToOne(inversedBy: 'orderRef', cascade: ['persist', 'remove'])]
     private ?Payment $payment = null;
 
-    public function __construct()
+    public function __construct(Customer $customer)
     {
         $this->orderItems = new ArrayCollection();
+        $this->customer = $customer;
+        $this->status = "CART";
+        $this->creationDate = new \DateTime();
     }
 
     public function getId(): ?int
@@ -61,23 +64,9 @@ class Order
         return $this->status;
     }
 
-    public function setStatus(string $status): static
-    {
-        $this->status = $status;
-
-        return $this;
-    }
-
     public function getTotalAmount(): ?float
     {
         return $this->totalAmount;
-    }
-
-    public function setTotalAmount(float $totalAmount): static
-    {
-        $this->totalAmount = $totalAmount;
-
-        return $this;
     }
 
     public function getCreationDate(): ?\DateTimeInterface
@@ -85,23 +74,9 @@ class Order
         return $this->creationDate;
     }
 
-    public function setCreationDate(\DateTimeInterface $creationDate): static
-    {
-        $this->creationDate = $creationDate;
-
-        return $this;
-    }
-
     public function getCustomer(): ?Customer
     {
         return $this->customer;
-    }
-
-    public function setCustomer(?Customer $customer): static
-    {
-        $this->customer = $customer;
-
-        return $this;
     }
 
     /**
@@ -119,6 +94,8 @@ class Order
             $orderItem->setOrderRef($this);
         }
 
+        $this->totalAmount = $this->addPriceToTotalAmount($orderItem->getPrice());
+
         return $this;
     }
 
@@ -133,7 +110,7 @@ class Order
             }
         }
 
-        $this->totalAmount -= $orderItem->getPrice();
+        $this->totalAmount = $this->removePriceToTotalAmount($orderItem->getPrice());
 
         return $this;
     }
@@ -143,41 +120,14 @@ class Order
         return $this->insurance;
     }
 
-    public function setInsurance(?Insurance $insurance): static
-    {
-        if ($this->getInsurance() == null) {
-            $this->insurance = $insurance;
-            $this->setTotalAmount($this->getTotalAmount() + $insurance->getPrice());
-        } else {
-            $this->setTotalAmount($this->getTotalAmount() - $insurance->getPrice());
-            $this->insurance = null;
-        }
-
-        return $this;
-    }
-
     public function getPaymentMethod(): ?PaymentMethod
     {
         return $this->paymentMethod;
     }
 
-    public function setPaymentMethod(?PaymentMethod $paymentMethod): static
-    {
-        $this->paymentMethod = $paymentMethod;
-
-        return $this;
-    }
-
     public function getPayment(): ?Payment
     {
         return $this->payment;
-    }
-
-    public function setPayment(?Payment $payment): static
-    {
-        $this->payment = $payment;
-
-        return $this;
     }
 
     public function pay(Payment $payment)
@@ -196,6 +146,18 @@ class Order
         $this->status = "PAID";
     }
 
+    public function addInsurance(Insurance $insurance)
+    {
+        $this->checkifOrderStatusIsCart();
+
+        if ($this->getInsurance() !== null) {
+            throw new Exception("Order already assured.");
+        }
+
+        $this->totalAmount = $this->addPriceToTotalAmount($this->insurance->getPrice());
+        $this->insurance = $insurance;
+    }
+
     public function removeInsurance()
     {
         $this->checkifOrderStatusIsCart();
@@ -204,8 +166,35 @@ class Order
             throw new Exception("This order is not under an insurance.");
         }
 
-        $this->totalAmount -= $this->insurance->getPrice();
+        $this->totalAmount = $this->removePriceToTotalAmount($this->insurance->getPrice());
         $this->insurance = null;
+    }
+
+    public function addPaymentMethod(PaymentMethod $paymentMethod)
+    {
+        $this->checkifOrderStatusIsCart();
+
+        $this->paymentMethod = $paymentMethod;
+
+        return $this;
+    }
+
+    public function addPriceToTotalAmount(float $value)
+    {
+        $this->checkifOrderStatusIsCart();
+
+        $this->totalAmount += $value;
+
+        return $this->totalAmount;
+    }
+
+    public function removePriceToTotalAmount(float $value)
+    {
+        $this->checkifOrderStatusIsCart();
+
+        $this->totalAmount -= $value;
+
+        return $this->totalAmount;
     }
 
     private function checkifOrderStatusIsCart()
